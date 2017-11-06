@@ -17,7 +17,7 @@ double fractional__bin_to_dec(string n)
 	}
 	return res;
 }
-double x32_bin_to_dec(char n[]) {	
+double x32_bin_to_dec(char n[]) {//нигде не используется, для проверки корректности функции	inp_in_32
 	double res = 0;
 	for (int i = 1; i < 16; i++) {
 		bool f = (n[i] == '1');
@@ -139,7 +139,7 @@ int predvarit_sdvig(char A[], char B[]) {
 	}
 	return b-a;
 }
-pair <string, string> deleniye(char A[], char B[]) {
+pair <string, string> deleniye(char A[], char B[]) {	
 	pair <string, string> result;
 	char BD[32];
 	int k = predvarit_sdvig(A, B);
@@ -151,7 +151,7 @@ pair <string, string> deleniye(char A[], char B[]) {
 		sum(A, BD, summ);
 		if (summ[0] == '1') { sdvig_left(A); result.first.append("0"); } //если вычитание дало отрицательный результат - то добавили ноль к результату и сдвинули делимое
 		else { result.first.append("1"); for (int i = 0; i < 32; i++) { A[i] = summ[i]; } sdvig_left(A); } //иначе добавили 1 к результату и заменили делимое частичным остатком и сдвинули его. Далее проделаем то же самое для частичного остатка
-		 /*if (i == k) {
+		 /*if (i == k) {//c остатком какие-то глюки, ошибается ровно на единицу, я пока не разобрался.
 				bool f = true;
 			for (int i = 0; i < 32; i++) { if (!(A[i] == '0')) f = false; }//если частичный остаток нулевой - то добавляем в остаток NIL
 			if (f) { result.second = "NIL"; }
@@ -160,7 +160,7 @@ pair <string, string> deleniye(char A[], char B[]) {
 				
 				result.second = to_string(x32_bin_to_dec(A)); }*/
 		}
-	for (int i = 0; i < 15; i++) {
+	for (int i = 0; i < 15; i++) {//рассчет дробной части результата
 		char summ[32];
 		sum(A, BD, summ);
 		if (summ[0] == '1') { sdvig_left(A); result.second.append("0"); } //если вычитание дало отрицательный результат - то добавили ноль к результату и сдвинули делимое
@@ -221,6 +221,22 @@ bool is_minus(string n, string m) {
 	bool g = (m[0] == '-');
 	return f^g;
 }
+string shaping_result_string(int a, double b, bool minus) {
+	string result;
+	if (minus)  result += '-';
+	result += to_string(a);
+	if (b == 0.0) { return result; }
+	else {
+		result += '.';
+		int poww = to_string(b).length() - 2;
+		b = b*pow(10, poww);
+		for (int i = 0; i < poww; i++) {
+			result += to_string(b)[i];
+		}
+
+		return result;
+	}
+}
 int main()
 {
 	
@@ -277,8 +293,10 @@ int main()
 			inp_in_32(n,A);				
 			inp_in_32(m, B);					
 			result = deleniye(A, B);
-			cout << "int: " <<integer_bin_to_dec(result.first) << endl;
-			cout << "fra: " << fractional__bin_to_dec(result.second) << endl;
+			int a = integer_bin_to_dec(result.first);
+			double b = fractional__bin_to_dec(result.second);
+			string resulat = shaping_result_string(a, b, is_minus(n,m));
+			cout << resulat << endl;
 			
 		}
 		}
