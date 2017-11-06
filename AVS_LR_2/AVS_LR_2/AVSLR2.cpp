@@ -5,15 +5,36 @@
 #include "iostream"
 #include <string>
 #include <math.h>
+#include <fstream>
 
 using namespace std;
-
+double fractional__bin_to_dec(string n)
+{
+	double res = 0;	
+	for (int i = 0; i < n.length(); i++) {
+		bool f = (n[i] == '1');
+		if (f) { res += (double)(1 / pow(2, (i+1))); }
+	}
+	return res;
+}
+double x32_bin_to_dec(char n[]) {	
+	double res = 0;
+	for (int i = 1; i < 16; i++) {
+		bool f = (n[i] == '1');
+		if (f) { res += pow(2, (16 - i)); }
+	}
+	for (int i = 17; i < 32; i++) {
+		bool f = (n[i] == '1');
+		if (f) { res += (double)(1/pow(2, (i-16))); }
+	}
+	return res;
+}
 int integer_bin_to_dec(string n) {
 	int length = n.length();
 	int res = 0; 
 	for (int i = 0; i < length; i++) {
 		bool f = (n[i]=='1');
-		if (f) { res += pow(2 , (length - 1 - i)); }
+		if (f) { res += (int)pow(2 , (length - 1 - i)); }
 	}
 	return res;
 }
@@ -105,6 +126,9 @@ void sdvig_left(char A[]) {
 	for (int i = 1; i < 31; i++) { A[i] = A[i + 1]; }//знак в сдвиге не участвует
 	A[31] = '0';
 }
+void sdvig_right(char A[]) {
+	for (int i = 30; i > 0; i--) { A[i+1] = A[i]; }//знак в сдвиге не участвует
+}
 int predvarit_sdvig(char A[], char B[]) {
 	int a = 0, b = 0;
 	for (int i = 0; i < 32; i++) {
@@ -115,25 +139,157 @@ int predvarit_sdvig(char A[], char B[]) {
 	}
 	return b-a;
 }
-string deleniye(char A[], char B[]) {
+pair <string, string> deleniye(char A[], char B[]) {
+	pair <string, string> result;
 	char BD[32];
 	int k = predvarit_sdvig(A, B);
 	for (int i = 0; i < k; i++) { sdvig_left(B); }
 	dop_code(B, BD);
-	string result;
+	string res;
 	for (int i = 0; i < k + 1; i++) {
 		char summ[32];
 		sum(A, BD, summ);
-		if (summ[0] == '1') { sdvig_left(A); result.append("0"); } //если вычитание дало отрицательный результат - то добавили ноль к результату и сдвинули делимое
-		else { result.append("1"); for (int i = 0; i < 32; i++) { A[i] = summ[i]; } sdvig_left(A); } //иначе добавили 1 к результату и заменили делимое частичным остатком и сдвинули его. Далее проделаем то же самое для частичного остатка
+		if (summ[0] == '1') { sdvig_left(A); result.first.append("0"); } //если вычитание дало отрицательный результат - то добавили ноль к результату и сдвинули делимое
+		else { result.first.append("1"); for (int i = 0; i < 32; i++) { A[i] = summ[i]; } sdvig_left(A); } //иначе добавили 1 к результату и заменили делимое частичным остатком и сдвинули его. Далее проделаем то же самое для частичного остатка
+		 /*if (i == k) {
+				bool f = true;
+			for (int i = 0; i < 32; i++) { if (!(A[i] == '0')) f = false; }//если частичный остаток нулевой - то добавляем в остаток NIL
+			if (f) { result.second = "NIL"; }
+			else {
+				for (int z = 0; z < k + 1; z++) { sdvig_right(A); }
+				
+				result.second = to_string(x32_bin_to_dec(A)); }*/
+		}
+	for (int i = 0; i < 15; i++) {
+		char summ[32];
+		sum(A, BD, summ);
+		if (summ[0] == '1') { sdvig_left(A); result.second.append("0"); } //если вычитание дало отрицательный результат - то добавили ноль к результату и сдвинули делимое
+		else { result.second.append("1"); for (int i = 0; i < 32; i++) { A[i] = summ[i]; } sdvig_left(A); }
 	}
+	
 	return result;
 }
+int string_checker(string n)
+{
+	int i = 0;
+	int indification = 0;
+
+	if (n == "")//пустая строка
+	{
+		indification = 3;
+		return indification;
+	}
+
+	if ((n[i]<'0' || n[i]>'9') && n[i] != '-') //первый символ не число и не минус
+	{
+
+		indification = 2;//ошибки в строке
+		return indification;
+	}
+	i++;
+
+
+	while (n[i] != '\0')
+	{
+		if (n[i]<'0' || n[i]>'9')
+			if (n[i] == '.'&& indification == 0)
+				indification = 1;//дробное число
+			else {
+				indification = 2;//ошибки
+				return indification;
+			}
+			i++;
+	}
+	return indification;//если 0 - то число целое (+или-)
+}
+void inp_in_32(string n, char b[32]) {//вставляем в массив (32 ячейки) 1-знак(только для операций),16-цел,15-дробн
+	for (int i = 0; i < 32; i++) { b[i] = '0'; }//инициализируем выходной массив
+	if (string_checker(n) == 0) {//если целое
+		string binary = integer_dec_to_bin(abs(stoi(n)));//переводим в двоичный код число
+		for (unsigned int i = 0; i < binary.length(); i++) { b[16 - i] = binary[binary.length() - 1 - i]; }
+	}
+	else {
+		double f = atof(n.c_str());
+		string int_binary = integer_dec_to_bin(abs((int)f));
+		string fractional_binary = fractional__dec_to_bin(abs(f - (int)f));
+		for (unsigned int i = 0; i < int_binary.length(); i++) { b[16 - i] = int_binary[int_binary.length() - 1 - i]; }
+		for (unsigned int i = 0; i < fractional_binary.length(); i++) { b[17 + i] = fractional_binary[i]; }
+	}
+}
+bool is_minus(string n, string m) {
+	bool f = (n[0]=='-');
+	bool g = (m[0] == '-');
+	return f^g;
+}
 int main()
-{	
-	char A[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '0', '1', '0',/**/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
+{
+	
+	//setlocale(LC_ALL, "rus");
+	char A[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '0', '1', '0',/*17*/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
 	char B[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '1', '0',/**/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
-	string d = deleniye(A, B);
-	cout << d;
+	pair <string, string> result;
+	
+	
+	/*= deleniye(A, B);
+	cout << result.first + result.second<<endl;*/
+	/*______________________________________________________________________________________________________________________________________________________________________________*/
+	ifstream fin("input.txt");
+	ifstream finn("output.txt");
+	ofstream fout("output.txt");
+	char k = 9;
+	cout << "To view the commands enter: 1" << endl;
+	cout << endl << "Enter the command" << endl;
+	while (k != '0')
+	{
+		cin >> k;
+		switch (k) {
+		case '0': {			
+			break;
+				}
+		case '1': {
+			cout << endl;
+			cout << "0:Exit" << endl;
+			cout << "1:Command list" << endl;
+			cout << "2:Divide the numbers in the file and write the answer in the file" << endl;
+			cout << "3:Divide the numbers entered in the console" << endl;
+			cout << "4:Show output file" << endl;
+			cout << endl << "Enter the command:" << endl;
+			break;
+		}
+		case '2': {
+			cout << "item 2 is selected" << endl;
+			cout << "Test: input: " << endl;
+			string nn;
+			cin >> nn;
+			char test[32];
+			inp_in_32(nn, test);
+			for (int i = 0; i < 31; i++) { cout << test[i]; }
+			break;
+		}
+		case '3': {
+			string n,m;
+			cout << "Dividend: " << endl;
+			cin >> n;
+			if (string_checker(n) == 2) {cout<<"Invalid number format, try again"<<endl; break;}
+			cout << "Divider:  " << endl;
+			cin >> m;
+			if (string_checker(m) == 2) { cout << "Invalid number format, try again" << endl; break; }
+			inp_in_32(n,A);				
+			inp_in_32(m, B);					
+			result = deleniye(A, B);
+			cout << "int: " <<integer_bin_to_dec(result.first) << endl;
+			cout << "fra: " << fractional__bin_to_dec(result.second) << endl;
+			
+		}
+		}
+	}
+
+	fin.close();
+	finn.close();
+	fout.close();
+
+
+
+	/*_______________________________________________________________________________________________________________________________________________________________________________*/
 	return 0;
 }
