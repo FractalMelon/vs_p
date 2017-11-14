@@ -246,9 +246,7 @@ int main()
 	pair <string, string> result;
 	
 	/*______________________________________________________________________________________________________________________________________________________________________________*/
-	ifstream fin("input.txt");
-	ifstream finn("output.txt");
-	ofstream fout("output.txt");
+	
 	char k = 9;
 	cout << "To view the commands enter: 1" << endl;
 	cout << endl << "Enter the command" << endl;
@@ -269,11 +267,11 @@ int main()
 			cout << endl << "Enter the command:" << endl;
 			break;
 		}
-		case '2': {
-			string n;
-			fin >> n;
-			cout << n << endl; break;
-			/*while (!fin.eof()) {
+		case '2': {	
+			ifstream fin("input.txt");
+			ifstream finn("output.txt");
+			ofstream fout("output.txt");
+			while (!fin.eof()) {
 				string n;
 				fin >> n;
 				switch (string_checker(n)) {
@@ -310,7 +308,10 @@ int main()
 
 				}
 			}
-			break;*/
+			fin.close();
+			finn.close();
+			fout.close();
+			break;
 		}
 		case '3': {
 			string n,m;
@@ -334,9 +335,7 @@ int main()
 		}
 	}
 
-	fin.close();
-	finn.close();
-	fout.close();
+	
 	
 	return 0;
 }

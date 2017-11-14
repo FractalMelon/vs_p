@@ -1,0 +1,4 @@
+100.1 : -3.45 = -29.14617.
+52,1   invalid input format of the first number
+-40.55 : 111.452 = -0.181915
+à   invalid input format of the second number
