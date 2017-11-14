@@ -241,13 +241,10 @@ int main()
 {
 	
 	//setlocale(LC_ALL, "rus");
-	char A[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '0', '1', '0',/*17*/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
-	char B[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '1', '0',/**/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
+	//char A[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '0', '1', '0',/*17*/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
+	//char B[32] = { '0','0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '1', '0',/**/ '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0' };
 	pair <string, string> result;
 	
-	
-	/*= deleniye(A, B);
-	cout << result.first + result.second<<endl;*/
 	/*______________________________________________________________________________________________________________________________________________________________________________*/
 	ifstream fin("input.txt");
 	ifstream finn("output.txt");
@@ -273,23 +270,58 @@ int main()
 			break;
 		}
 		case '2': {
-			cout << "item 2 is selected" << endl;
-			cout << "Test: input: " << endl;
-			string nn;
-			cin >> nn;
-			char test[32];
-			inp_in_32(nn, test);
-			for (int i = 0; i < 31; i++) { cout << test[i]; }
-			break;
+			string n;
+			fin >> n;
+			cout << n << endl; break;
+			/*while (!fin.eof()) {
+				string n;
+				fin >> n;
+				switch (string_checker(n)) {
+				case 2:
+					{
+						fout << n << "   " << "invalid input format of the first number" << endl;	//Сообщение об ошибке записи преобразованного числа в файл	
+						break;
+					}
+				case 3:break;
+				default: {
+					string m;
+					fin >> m;
+					switch (string_checker(m)) {
+					case 2:
+					{
+						fout << m << "   " << "invalid input format of the second number" << endl;	//Сообщение об ошибке записи преобразованного числа в файл	
+						break;
+					}
+					case 3:break;
+					default: {
+						char A[32], B[32];
+						inp_in_32(n, A);
+						inp_in_32(m, B);
+						result = deleniye(A, B);
+						int a = integer_bin_to_dec(result.first);
+						double b = fractional__bin_to_dec(result.second);
+						string resulat = shaping_result_string(a, b, is_minus(n, m));
+						fout << n <<" : "<<m<<" = "<< resulat << endl;
+						cout << "the results of the calculations are written to the file" << endl;
+						break;
+					}
+					}
+				}
+
+				}
+			}
+			break;*/
 		}
 		case '3': {
 			string n,m;
+			char A[32], B[32];
 			cout << "Dividend: " << endl;
 			cin >> n;
 			if (string_checker(n) == 2) {cout<<"Invalid number format, try again"<<endl; break;}
 			cout << "Divider:  " << endl;
 			cin >> m;
 			if (string_checker(m) == 2) { cout << "Invalid number format, try again" << endl; break; }
+			if (stod(m) == 0) { cout << "Error: division by zero" << endl; break; }
 			inp_in_32(n,A);				
 			inp_in_32(m, B);					
 			result = deleniye(A, B);
@@ -305,9 +337,6 @@ int main()
 	fin.close();
 	finn.close();
 	fout.close();
-
-
-
-	/*_______________________________________________________________________________________________________________________________________________________________________________*/
+	
 	return 0;
 }
